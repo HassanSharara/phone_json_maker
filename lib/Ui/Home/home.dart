@@ -183,18 +183,17 @@ class _HomeState extends State<Home> {
 
   void _showPopActions() {
     final context =this.context;
-
+    final node = handler.copiedNode;
+    if(node == null )return;
     showCupertinoModalPopup(
         context: context,
         builder: (context)=>CupertinoActionSheet(
           title:Text("Nodes Options"),
           actions: [
             CupertinoActionSheetAction(onPressed: (){
-              final node = handler.copiedNode;
-              if(node!=null){
                 handler.nodes.add(Node.copy(node)..key = "${node.key} - Copy");
                 handler.update();
-              }
+
               Navigator.pop(context);
             },
                 child: Text("Paste")),

@@ -25,61 +25,66 @@ class NodeInfo extends StatelessWidget {
             ValueListenableBuilder(
               valueListenable:handler.notifier,
               builder:(BuildContext context,_,__){
-                return CustomScrollView(
-                  slivers: [
-                    SliverToBoxAdapter(child: const SizedBox(height:20,),),
-                    SliverToBoxAdapter(
-                        child:
-                        Column(
-                          mainAxisAlignment:MainAxisAlignment.center,
-                          crossAxisAlignment:CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              padding:const EdgeInsets.all(30),
-                              decoration:BoxDecoration(
-                                  shape:BoxShape.circle,
-                                  color:node.isHide ? Colors.blueGrey:Colors.blue
-                              ),
-                              child:Text(node.key,
-                                style:TextStyle(
-                                    color: Colors.white,
-                                    fontSize:10
+                return GestureDetector(
+                  onLongPress:(){
+                    _showPopActions(context);
+                  },
+                  child: CustomScrollView(
+                    slivers: [
+                      SliverToBoxAdapter(child: const SizedBox(height:20,),),
+                      SliverToBoxAdapter(
+                          child:
+                          Column(
+                            mainAxisAlignment:MainAxisAlignment.center,
+                            crossAxisAlignment:CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                padding:const EdgeInsets.all(30),
+                                decoration:BoxDecoration(
+                                    shape:BoxShape.circle,
+                                    color:node.isHide ? Colors.blueGrey:Colors.blue
+                                ),
+                                child:Text(node.key,
+                                  style:TextStyle(
+                                      color: Colors.white,
+                                      fontSize:10
+                                  ),
                                 ),
                               ),
+                              const SizedBox(height:2,),
+                              const Icon(Icons.arrow_downward_rounded)
+                            ],
+                          ),),
+
+                      SliverToBoxAdapter(child: const SizedBox(height:10,),),
+
+
+                      if (node.value is String)
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8.0,
+                             vertical:20
                             ),
-                            const SizedBox(height:2,),
-                            const Icon(Icons.arrow_downward_rounded)
-                          ],
-                        ),),
-
-                    SliverToBoxAdapter(child: const SizedBox(height:10,),),
-
-
-                    if (node.value is String)
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0,
-                           vertical:20
+                            child: Text(node.value,style:TextStyle(
+                              fontWeight:FontWeight.bold,
+                              fontSize:20
+                            ),
+                             textAlign:TextAlign.center,
+                            ),
                           ),
-                          child: Text(node.value,style:TextStyle(
-                            fontWeight:FontWeight.bold,
-                            fontSize:20
-                          ),
-                           textAlign:TextAlign.center,
-                          ),
-                        ),
-                      )
-                    else ...[
+                        )
+                      else ...[
 
-                      SliverList.builder(
-                        itemCount:(node.value as List).length,
-                        itemBuilder:(BuildContext context,final int index){
-                          final l = node.value as List<Node>;
-                          return NodeSingleWidget(node: l[index], handler: handler);
-                        },
-                      )
-                    ]
-                  ],
+                        SliverList.builder(
+                          itemCount:(node.value as List).length,
+                          itemBuilder:(BuildContext context,final int index){
+                            final l = node.value as List<Node>;
+                            return NodeSingleWidget(node: l[index], handler: handler);
+                          },
+                        )
+                      ]
+                    ],
+                  ),
                 );
               },
             ),
@@ -112,19 +117,19 @@ class NodeInfo extends StatelessWidget {
     );
   }
   void _showPopActions(final BuildContext context) {
-
+    final n = handler.copiedNode;
+    final value = node.value;
+    if(!(n!=null && value is List<Node>)){
+      return;
+    }
     showCupertinoModalPopup(
         context: context,
         builder: (context)=>CupertinoActionSheet(
           title:Text("Nodes Options"),
           actions: [
             CupertinoActionSheetAction(onPressed: (){
-              final n = handler.copiedNode;
-              final value = node.value;
-              if(n!=null && value is List<Node>){
-                value.add(Node.copy(n)..key = '${n.key} - Copy');
-                handler.update();
-              }
+              value.add(Node.copy(n)..key = '${n.key} - Copy');
+              handler.update();
               Navigator.pop(context);
             },
                 child: Text("Paste")),
