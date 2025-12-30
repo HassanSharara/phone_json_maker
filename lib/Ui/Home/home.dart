@@ -1,6 +1,7 @@
 
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nested_json/Handler/handler.dart';
@@ -89,17 +90,16 @@ class _HomeState extends State<Home> {
                            try {
                              final j = handler.exportAsJson();
                              final fut = Future.delayed(const Duration(seconds:1));
-                             final Directory d = await getDownloadsDirectory()
-                              ?? await getApplicationDocumentsDirectory()
-                             ;
-                             final File file  = File("${d.path}/jsons/${DateTime.now().millisecondsSinceEpoch}.json");
-                             print("file ${file.path}");
+                             final String? d = await FilePicker.platform.getDirectoryPath();
+                             if(d == null )return;
+                             final File file  = File("${d}/jsons/nested_${DateTime.now().millisecondsSinceEpoch}.json");
                              await file.create(recursive:true);
-                             await file.writeAsBytes(j.codeUnits);
+                             await file.writeAsString(j);
                              await fut;
-                             SharePlus.instance.share(ShareParams(files:[XFile(file.path)]));
-                           }catch(_){
-
+                             SharePlus.instance.share(
+                                 ShareParams(files:[XFile(file.path)]));
+                           }catch(e){
+                             print("object $e");
                            }finally {
                              setState(() {
                                 _loading = false;
@@ -130,16 +130,21 @@ class _HomeState extends State<Home> {
                           child:Text("There is no Data"),
                         );
                       }
-                      return CustomScrollView(
-                        slivers: [
-                          SliverList.builder(
-                            itemCount: nodes.length,
-                            itemBuilder:(BuildContext context,final int index){
-                              final Node node = nodes[index];
-                              return NodeSingleWidget(node: node,handler: handler,);
-                            },
-                          )
-                        ],
+                      return GestureDetector(
+                        onLongPress:(){
+                          _showPopActions();
+                        },
+                        child: CustomScrollView(
+                          slivers: [
+                            SliverList.builder(
+                              itemCount: nodes.length,
+                              itemBuilder:(BuildContext context,final int index){
+                                final Node node = nodes[index];
+                                return NodeSingleWidget(node: node,handler: handler,);
+                              },
+                            )
+                          ],
+                        ),
                       );
                     },
                   ),
@@ -174,5 +179,33 @@ class _HomeState extends State<Home> {
           ],
         ),
       ));
+  }
+
+  void _showPopActions() {
+    final context =this.context;
+
+    showCupertinoModalPopup(
+        context: context,
+        builder: (context)=>CupertinoActionSheet(
+          title:Text("Nodes Options"),
+          actions: [
+            CupertinoActionSheetAction(onPressed: (){
+              final node = handler.copiedNode;
+              if(node!=null){
+                handler.nodes.add(Node.copy(node)..key = "${node.key} - Copy");
+                handler.update();
+              }
+              Navigator.pop(context);
+            },
+                child: Text("Paste")),
+
+            CupertinoActionSheetAction(onPressed: (){
+              Navigator.pop(context);
+            },
+              isDestructiveAction:true,
+                child: Text("cancel"),
+            )
+          ],
+        ));
   }
 }

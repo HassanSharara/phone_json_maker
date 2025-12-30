@@ -30,10 +30,29 @@ class NodeInfo extends StatelessWidget {
                     SliverToBoxAdapter(child: const SizedBox(height:20,),),
                     SliverToBoxAdapter(
                         child:
-                        Text(node.key,
-                          style:TextStyle(fontSize:22,fontWeight:FontWeight.w700),
-                          textAlign:TextAlign.center,
+                        Column(
+                          mainAxisAlignment:MainAxisAlignment.center,
+                          crossAxisAlignment:CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding:const EdgeInsets.all(30),
+                              decoration:BoxDecoration(
+                                  shape:BoxShape.circle,
+                                  color:node.isHide ? Colors.blueGrey:Colors.blue
+                              ),
+                              child:Text(node.key,
+                                style:TextStyle(
+                                    color: Colors.white,
+                                    fontSize:10
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height:2,),
+                            const Icon(Icons.arrow_downward_rounded)
+                          ],
                         ),),
+
+                    SliverToBoxAdapter(child: const SizedBox(height:10,),),
 
 
                     if (node.value is String)
@@ -42,7 +61,10 @@ class NodeInfo extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 8.0,
                            vertical:20
                           ),
-                          child: Text(node.value,style:TextStyle(),
+                          child: Text(node.value,style:TextStyle(
+                            fontWeight:FontWeight.bold,
+                            fontSize:20
+                          ),
                            textAlign:TextAlign.center,
                           ),
                         ),
@@ -89,4 +111,32 @@ class NodeInfo extends StatelessWidget {
       ),
     );
   }
+  void _showPopActions(final BuildContext context) {
+
+    showCupertinoModalPopup(
+        context: context,
+        builder: (context)=>CupertinoActionSheet(
+          title:Text("Nodes Options"),
+          actions: [
+            CupertinoActionSheetAction(onPressed: (){
+              final n = handler.copiedNode;
+              final value = node.value;
+              if(n!=null && value is List<Node>){
+                value.add(Node.copy(n)..key = '${n.key} - Copy');
+                handler.update();
+              }
+              Navigator.pop(context);
+            },
+                child: Text("Paste")),
+
+            CupertinoActionSheetAction(onPressed: (){
+              Navigator.pop(context);
+            },
+              isDestructiveAction:true,
+              child: Text("cancel"),
+            )
+          ],
+        ));
+  }
+
 }

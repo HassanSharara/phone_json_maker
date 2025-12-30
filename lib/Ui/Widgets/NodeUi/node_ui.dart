@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:nested_json/Handler/handler.dart';
 import 'package:nested_json/Models/models.dart';
 import 'package:nested_json/Ui/UpdateScreen/update_screen.dart';
@@ -46,10 +47,15 @@ class _NodeSingleWidgetState extends State<NodeSingleWidget> {
                  )
                 );
               },
-              child: Icon(CupertinoIcons.helm)),
+              child: Icon(
+
+                node.isHide?CupertinoIcons.eye_slash_fill:CupertinoIcons.desktopcomputer,
+                color:node.isHide?Colors.blueGrey:null,
+              )),
           subtitle:Text(node.value is String ? node.value:""),
           title:Text(node.key,style:TextStyle(
             fontWeight:FontWeight.bold,
+            color:node.isHide?Colors.blueGrey:null
           ),
           semanticsLabel:node.value is String ? node.value.toString():"",
           ),
@@ -63,6 +69,38 @@ class _NodeSingleWidgetState extends State<NodeSingleWidget> {
       builder: (context) => CupertinoActionSheet(
         title: Text('Options for ${node.key}'),
         actions: [
+
+          CupertinoActionSheetAction(
+            onPressed: () {
+              widget.handler.copyNode(node);
+              Navigator.pop(context);
+            },
+            child:  Text("Copy"),
+          ),
+
+          CupertinoActionSheetAction(
+            onPressed: () {
+              widget.handler.duplicateNode(node);
+              Navigator.pop(context);
+            },
+            child:  Text("Duplicate"),
+          ),
+
+          CupertinoActionSheetAction(
+            onPressed: () {
+              final String pat = "hide_";
+              if(node.actualKey.startsWith(pat)){
+                node.key = node.key;
+              }
+              else {
+                node.key = "hide_${node.key}";
+              }
+              widget.handler.update();
+              Navigator.pop(context);
+            },
+            child:  Text(node.actualKey.startsWith("hide_")?"UnHide":'Hide'),
+          ),
+
           CupertinoActionSheetAction(
             isDestructiveAction: true,
             onPressed: () {

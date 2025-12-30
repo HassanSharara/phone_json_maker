@@ -1,10 +1,25 @@
 
 class Node {
-  String key;
+  String _key;
   dynamic value;
   bool deleted = false;
-  Node(this.key,this.value);
+  Node(final String key,this.value):_key = key;
 
+  factory Node.copy(final Node node){
+    Node n = Node(node._key,node.value);
+    return n;
+  }
+
+  bool get isHide => _key.startsWith("hide_");
+  String get key {
+    final pat = "hide_";
+    if(_key.startsWith(pat)) return _key.substring(pat.length,_key.length);
+    return _key;
+  }
+   set key(final v) {
+      _key = v;
+   }
+  String get actualKey => _key;
   Map get toMap => {
     if(value is List<Node>)
     key:(value as List<Node>).toMap
@@ -14,6 +29,7 @@ class Node {
 
 
   String  totalNodeToString([int counter =0 ]) {
+    if(isHide)return"";
     String res = "";
     res += "$key : \n";
     final v = value;

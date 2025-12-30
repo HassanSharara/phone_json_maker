@@ -35,12 +35,25 @@ final class DataHandler {
     await cache.save(nodes.toMap);
   }
 
+
+  Node? copiedNode;
+  copyNode(final Node node){
+    copiedNode = node;
+  }
+  duplicateNode(final Node node){
+    final r = nodes.getNode(node);
+    if(r == null )return;
+    r.$1.insert(r.$2,Node.copy(node)..key = "${node.key} - Copy");
+    update();
+  }
+
   bool _disposed = false;
   dispose(){
     if(_disposed)return;
     _disposed = true;
     notifier.dispose();
   }
+
 
   removeDeleters(){
     nodes.removeDeleters();
@@ -50,8 +63,20 @@ final class DataHandler {
 
 extension Deleters on List<Node>{
 
+  (List<Node>,int,Node)? getNode(final Node node){
+    for(int i =0;i<length;i++){
+      final n = this[i];
+      if( n == node) return (this,i,n);
+      final v = n.value;
+      if(v is List<Node>)return v.getNode(node);
+    }
+    return null;
+  }
   removeDeleters(){
-    removeWhere((e)=>e.deleted);
+    removeWhere((e){
+      final r = e.deleted;
+      return r;
+    });
     for( final e in this){
       final v = e.value;
       if( v is List<Node>)v.removeDeleters();
@@ -69,8 +94,10 @@ extension Importers on DataHandler {
       final File file = File(files!.files.first.path.toString());
       final data = await file.readAsString();
       final j = json.decode(data);
+
       if( j is! Map)return;
       nodes = j.toListOfNode;
+      _changeNotifier();
     }
     catch(_){
     }

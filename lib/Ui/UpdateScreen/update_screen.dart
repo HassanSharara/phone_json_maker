@@ -62,9 +62,33 @@ class _UpdateScreenState extends State<UpdateScreen> {
           ),
           children: [
             const SizedBox(height:20),
+            if(widget.fatherNode!=null)
+            Column(
+              mainAxisAlignment:MainAxisAlignment.center,
+              crossAxisAlignment:CrossAxisAlignment.center,
+              children: [
+                Container(
+                  padding:const EdgeInsets.all(18),
+                  decoration:BoxDecoration(
+                    shape:BoxShape.circle,
+                    color:Colors.blue
+                  ),
+                  child:Text(widget.fatherNode!.key,
+                    style:TextStyle(
+                      color: Colors.white,
+                      fontSize:11
+                    ),
+                  ),
+                ),
+                const SizedBox(height:2,),
+                const Icon(Icons.arrow_downward_rounded)
+              ],
+            ),
+            const SizedBox(height:20),
             CupertinoTextField(
               controller: key,
               placeholder: "Key",
+              maxLines:2,
               padding: const EdgeInsets.symmetric(
                 vertical: 12,
                 horizontal: 16,
@@ -108,10 +132,12 @@ class _UpdateScreenState extends State<UpdateScreen> {
                     ),
                     if(type == ValueType.string)
                     ...[
+
                         const SizedBox(height:20),
                         CupertinoTextField(
                           controller: value,
                           placeholder: "Value",
+                          maxLines: 10,
                           padding: const EdgeInsets.symmetric(
                             vertical: 12,
                             horizontal: 16,
